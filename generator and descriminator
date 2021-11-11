@@ -1,0 +1,160 @@
+import math
+class generator(nn.Module):
+  # initializers
+  def __init__(self):
+    super(generator, self).__init__()
+    #++++++++++++++++++++++++++++++++++++++++++++++#
+    #++++++++++++++++++++++++++++++++++++++++++++++#
+   
+    # Unet encoder
+    self.conv1 = nn.Conv2d(3,64,4,2,1)
+    self.conv2 = nn.Conv2d(64,64*2,4,2,1)
+    self.batchnorm3 = nn.BatchNorm2d(64*2)
+    self.conv4 = nn.Conv2d(64*2,64*4,4,2,1)
+    self.batchnorm5 = nn.BatchNorm2d(64*4)
+    self.conv6 = nn.Conv2d(64*4,64*8,4,2,1)
+    self.batchnorm7 = nn.BatchNorm2d(64*8)
+    self.conv8 = nn.Conv2d(64*8,64*8,4,2,1)
+    self.batchnorm9 = nn.BatchNorm2d(64*8)
+    self.conv10 = nn.Conv2d(64*8,64*8,4,2,1)
+    self.batchnorm11 = nn.BatchNorm2d(64*8)
+    self.conv12 = nn.Conv2d(64*8,64*8,4,2,1)
+    self.batchnorm13 = nn.BatchNorm2d(64*8)
+    self.conv14 = nn.Conv2d(64*8,64*8,4,2,1)
+    
+    # Unet decoder
+    self.deconv15 = nn.ConvTranspose2d(64*8,64*8,4,2,1)
+    self.batchnorm16 = nn.BatchNorm2d(64*8)
+    self.deconv17 = nn.ConvTranspose2d(64*8*2,64*8,4,2,1)
+    self.batchnorm18 = nn.BatchNorm2d(64*8)
+    self.deconv19 = nn.ConvTranspose2d(64*8*2,64*8,4,2,1)
+    self.batchnorm20 = nn.BatchNorm2d(64*8)
+    self.deconv21 = nn.ConvTranspose2d(64*8*2,64*8,4,2,1)
+    self.batchnorm22 = nn.BatchNorm2d(64*8)
+    self.deconv23 = nn.ConvTranspose2d(64*8*2,64*4,4,2,1)
+    self.batchnorm24 = nn.BatchNorm2d(64*4)
+    self.deconv25 = nn.ConvTranspose2d(64*4*2,64*2,4,2,1)
+    self.batchnorm26 = nn.BatchNorm2d(64*2)
+    self.deconv27 = nn.ConvTranspose2d(64*2*2,64,4,2,1)
+    self.batchnorm28 = nn.BatchNorm2d(64)
+    self.deconv29 = nn.ConvTranspose2d(64*2,3,4,2,1)
+    self.tanh = nn.Tanh()
+       
+    
+   
+    #++++++++++++++++++++++++++++++++++++++++++++++#
+    #++++++++++++++++++++++++++++++++++++++++++++++#
+
+  # weight_init
+  def weight_init(self, mean, std):
+    for m in self._modules:
+      normal_init(self._modules[m], mean, std)
+
+  # forward method
+  def forward(self, input):
+    #++++++++++++++++++++++++++++++++++++++++++++++#
+    #++++++++++++++++++++++++++++++++++++++++++++++#
+    
+    # encoding
+    e1 = self.conv1(input)
+    e2 = self.conv2(F.leaky_relu(e1,0.2))
+    e3 = self.batchnorm3(e2)
+    e4 = self.conv4(F.leaky_relu(e3,0.2))
+    e5 = self.batchnorm5(e4)
+    e6 = self.conv6(F.leaky_relu(e5,0.2))
+    e7 = self.batchnorm7(e6)
+    e8 = self.conv8(F.leaky_relu(e7,0.2))
+    e9 = self.batchnorm9(e8)
+    e10 = self.conv10(F.leaky_relu(e9,0.2))
+    e11 = self.batchnorm11(e10)
+    e12 = self.conv12(F.leaky_relu(e11,0.2))
+    e13 = self.batchnorm13(e12)
+    e14 = self.conv14(F.leaky_relu(e13,0.2))
+
+    # decoding
+   
+    d1 = self.deconv15(F.relu(e14))
+    d2 = self.batchnorm16(d1)
+    d2 = torch.cat([d2,e12],1)
+    d3 = self.deconv17(F.relu(d2))       
+    d4 = self.batchnorm18(d3)
+    d4 = torch.cat([d4,e10],1)
+    d5 = self.deconv19(F.relu(d4))    
+    d6 = self.batchnorm20(d5)
+    d6 = torch.cat([d6,e8],1)
+    d7 = self.deconv21(F.relu(d6))    
+    d8 = self.batchnorm22(d7)
+    d8 = torch.cat([d8,e6],1)
+    d9 = self.deconv23(F.relu(d8))    
+    d10 = self.batchnorm24(d9)
+    d10 = torch.cat([d10,e4],1)
+    d11 = self.deconv25(F.relu(d10))    
+    d12 = self.batchnorm26(d11)
+    d12 = torch.cat([d12,e2],1)
+    d13 = self.deconv27(F.relu(d12))
+    d14 = self.batchnorm28(d13)
+    d14 = torch.cat([d14,e1],1)
+    output = self.tanh(self.deconv29(F.relu(d14)))
+
+    # d1 = torch.cat([d1,e13],1)
+    # d2 = torch.cat([d2,e12],1)
+    # d3 = torch.cat([d3,e11],1)    
+    # d5 = torch.cat([d5,e9],1)    
+    # d7 = torch.cat([d7,e7],1)    
+    # d9 = torch.cat([d9,e5],1)    
+    # d11 = torch.cat([d11,e3],1)        
+   
+    #++++++++++++++++++++++++++++++++++++++++++++++#
+    #++++++++++++++++++++++++++++++++++++++++++++++#
+
+    return output
+
+class discriminator(nn.Module):
+  # initializers
+  def __init__(self):
+    super(discriminator, self).__init__()
+    #++++++++++++++++++++++++++++++++++++++++++++++#
+    #++++++++++++++++++++++++++++++++++++++++++++++#
+    
+    self.descr_conv1 = nn.Conv2d(6,64,4,2,1)    
+    self.descr_conv2 = nn.Conv2d(64,64*2,4,2,1) 
+    self.descr_batchnorm3 = nn.BatchNorm2d(64*2)orm2d
+    self.descr_conv4 = nn.Conv2d(64*2,64*4,4,2,1)    
+    self.descr_batchnorm5 = nn.BatchNorm2d(64*4)       
+    self.descr_conv6 = nn.Conv2d(64*4,64*8,(4,4),1,1)      
+    self.descr_batchnorm7 = nn.BatchNorm2d(64*8)        
+    self.descr_conv = nn.Conv2d(64*8,1,4,stride=1,padding=1)    
+   
+    #++++++++++++++++++++++++++++++++++++++++++++++#
+    #++++++++++++++++++++++++++++++++++++++++++++++#
+
+  # weight_init
+  def weight_init(self, mean, std):
+    for m in self._modules:
+      normal_init(self._modules[m], mean, std)
+
+  # forward method
+  def forward(self, input):
+    #++++++++++++++++++++++++++++++++++++++++++++++#
+    #++++++++++++++++++++++++++++++++++++++++++++++#
+   
+    des1 = self.descr_conv1(input)
+    des2 = self.descr_conv2(F.leaky_relu(des1,0.2))
+    des3 = self.descr_batchnorm3(des2)
+    des4 = self.descr_conv4(F.leaky_relu(des3,0.2))
+    des5 = self.descr_batchnorm5(des4)
+    des6 = self.descr_conv6(F.leaky_relu(des5,0.2))
+    des7 = self.descr_batchnorm7(des6)
+    x = self.descr_conv(F.leaky_relu(des7,0.2))
+    #sigmoid = torch.sigmoid()    
+    x = torch.sigmoid(x)        
+    
+    #++++++++++++++++++++++++++++++++++++++++++++++#
+    #++++++++++++++++++++++++++++++++++++++++++++++#
+
+    return x
+# print out the model summary
+G = generator().cuda()
+D = discriminator().cuda()
+summary(G, (3, 256, 256))
+summary(D, (6, 256, 256))    
