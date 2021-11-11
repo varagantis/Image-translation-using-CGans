@@ -1,0 +1,59 @@
+# Helper function for showing result.
+def process_image(img):
+  return (img.cpu().data.numpy().transpose(1, 2, 0) + 1) / 2
+
+def show_result(G, x_, y_, num_epoch):
+  predict_images = G(x_)
+
+  fig, ax = plt.subplots(x_.size()[0], 3, figsize=(6,10))
+
+  for i in range(x_.size()[0]):
+    ax[i, 0].get_xaxis().set_visible(False)
+    ax[i, 0].get_yaxis().set_visible(False)
+    ax[i, 1].get_xaxis().set_visible(False)
+    ax[i, 1].get_yaxis().set_visible(False)
+    ax[i, 2].get_xaxis().set_visible(False)
+    ax[i, 2].get_yaxis().set_visible(False)
+    ax[i, 0].cla()
+    ax[i, 0].imshow(process_image(x_[i]))
+    ax[i, 1].cla()
+    ax[i, 1].imshow(process_image(predict_images[i]))
+    ax[i, 2].cla()
+    ax[i, 2].imshow(process_image(y_[i]))
+  
+  plt.tight_layout()
+  label_epoch = 'Epoch {0}'.format(num_epoch)
+  fig.text(0.5, 0, label_epoch, ha='center')
+  label_input = 'Input'
+  fig.text(0.18, 1, label_input, ha='center')
+  label_output = 'Output'
+  fig.text(0.5, 1, label_output, ha='center')
+  label_truth = 'Ground truth'
+  fig.text(0.81, 1, label_truth, ha='center')
+
+  plt.show()
+
+# Helper function for counting number of trainable parameters.
+def count_params(model):
+  '''
+  Counts the number of trainable parameters in PyTorch.
+  Args:
+      model: PyTorch model.
+  Returns:
+      num_params: int, number of trainable parameters.
+  '''
+  num_params = sum([item.numel() for item in model.parameters() if item.requires_grad])
+  return num_params
+  
+  # Define network
+G_100 = generator()
+D_100 = discriminator()
+G_100.weight_init(mean=0.0, std=0.02)
+D_100.weight_init(mean=0.0, std=0.02)
+G_100.cuda()
+D_100.cuda()
+G_100.train()
+D_100.train()
+
+
+hist_D_100_losses, hist_G_100_BCE_losses, hist_G_100_L1_losses = train(G_100, D_100, num_epochs = 20, only_L1 = False)
